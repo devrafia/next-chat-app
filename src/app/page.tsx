@@ -2,102 +2,193 @@ import Image from "next/image";
 
 export default function Home() {
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+    <>
+      <Navbar />
+      <main>
+        <div className="flex flex-1 h-[calc(100vh-64px)]">
+          <ContactList />
+          <Chat>
+            <ChatInput />
+          </Chat>
         </div>
       </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
+    </>
+  );
+}
+
+export function Navbar() {
+  return (
+    <>
+      <header>
+        <nav>
+          <div className="navbar bg-primary text-primary-content">
+            <div className="flex-none">
+              <button className="btn btn-square btn-ghost">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  className="inline-block h-5 w-5 stroke-current"
+                >
+                  {" "}
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M4 6h16M4 12h16M4 18h16"
+                  ></path>{" "}
+                </svg>
+              </button>
+            </div>
+            <button className="btn btn-ghost text-xl">Chat App</button>
+          </div>
+        </nav>
+      </header>
+    </>
+  );
+}
+
+export function ContactList() {
+  return (
+    <>
+      <section className="relative flex-1/3 bg-slate-700">
+        <ul className="list bg-base-100 rounded-box shadow-md">
+          <li className="list-row hover:bg-base-200 active:bg-base-300 cursor-pointer">
+            <div>
+              <img
+                className="size-10 rounded-box"
+                src="https://img.daisyui.com/images/profile/demo/1@94.webp"
+              />
+            </div>
+            <div>
+              <div>Dio Lupa</div>
+              <div className="text-xs uppercase font-semibold opacity-60">
+                Remaining Reason
+              </div>
+            </div>
+          </li>
+
+          <li className="list-row hover:bg-base-200 active:bg-base-300 cursor-pointer">
+            <div>
+              <img
+                className="size-10 rounded-box"
+                src="https://img.daisyui.com/images/profile/demo/4@94.webp"
+              />
+            </div>
+            <div>
+              <div>Ellie Beilish</div>
+              <div className="text-xs uppercase font-semibold opacity-60">
+                Bears of a fever
+              </div>
+            </div>
+          </li>
+
+          <li className="list-row hover:bg-base-200 active:bg-base-300 cursor-pointer">
+            <div>
+              <img
+                className="size-10 rounded-box"
+                src="https://img.daisyui.com/images/profile/demo/3@94.webp"
+              />
+            </div>
+            <div>
+              <div>Sabrino Gardener</div>
+              <div className="text-xs uppercase font-semibold opacity-60">
+                Cappuccino
+              </div>
+            </div>
+          </li>
+        </ul>
+        <div className="absolute bottom-0 right-0 bg-primary w-12 h-12 rounded-full flex justify-center items-center cursor-pointer m-4">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth={1.5}
+            stroke="currentColor"
+            className="size-6"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M12 4.5v15m7.5-7.5h-15"
+            />
+          </svg>
+        </div>
+      </section>
+    </>
+  );
+}
+
+export function Chat({ children }: any) {
+  return (
+    <>
+      <section className="relative bg-slate-800 w-full p-4 pt-0">
+        <div className="container">
+          <div className="chat chat-start">
+            <div className="chat-image avatar">
+              <div className="w-10 rounded-full">
+                <img
+                  alt="Tailwind CSS chat bubble component"
+                  src="https://img.daisyui.com/images/profile/demo/kenobee@192.webp"
+                />
+              </div>
+            </div>
+            <div className="chat-header">
+              Obi-Wan Kenobi
+              <time className="text-xs opacity-50">12:45</time>
+            </div>
+            <div className="chat-bubble">You were the Chosen One!</div>
+            <div className="chat-footer opacity-50">Delivered</div>
+          </div>
+          <div className="chat chat-end">
+            <div className="chat-image avatar">
+              <div className="w-10 rounded-full">
+                <img
+                  alt="Tailwind CSS chat bubble component"
+                  src="https://img.daisyui.com/images/profile/demo/anakeen@192.webp"
+                />
+              </div>
+            </div>
+            <div className="chat-header">
+              Anakin
+              <time className="text-xs opacity-50">12:46</time>
+            </div>
+            <div className="chat-bubble">I hate you!</div>
+            <div className="chat-footer opacity-50">Seen at 12:46</div>
+          </div>
+        </div>
+        <div className="absolute flex bottom-0 left-0 right-0 w-full bg-slate-800 p-4 gap-2 justify-center items-center">
+          <input
+            type="text"
+            placeholder="Send a Message!"
+            className="input input-primary w-full"
           />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
+          {children}
+        </div>
+      </section>
+    </>
+  );
+}
+
+export function ChatInput() {
+  return (
+    <>
+      <div className="rounded-full bg-primary w-10 h-10 flex items-center justify-center cursor-pointer">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          strokeWidth={1.5}
+          stroke="currentColor"
+          className="size-6"
         >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12Zm0 0h7.5"
           />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+        </svg>
+      </div>
+    </>
   );
 }
