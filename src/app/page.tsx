@@ -49,7 +49,16 @@ async function createOrGetRoom(selectedUser: any) {
 }
 
 export function useMessages(roomId: any) {
+  const [roomData, setRoomData] = useState(null);
   const [messages, setMessages] = useState<any[]>([]);
+
+  const roomRef = doc(db, "rooms", roomId);
+  onSnapshot(roomRef, (docSnapshot) => {
+    if (docSnapshot.exists()) {
+      setRoomData(docSnapshot.data().userInfo);
+    }
+  });
+
   useEffect(() => {
     const q = query(
       collection(db, `rooms/${roomId}/messages`),
@@ -62,12 +71,11 @@ export function useMessages(roomId: any) {
         ...doc.data(),
       }));
       setMessages(docs);
-      console.log(docs);
     });
-    return () => unsubscribe(); // penting: bersihkan listener
+    return () => unsubscribe();
   }, [roomId]);
 
-  return messages;
+  return { roomData, messages };
 }
 
 export default function Home() {
@@ -187,42 +195,39 @@ export function ContactList({ onSelectRoom }: any) {
 }
 
 export function Chat({ roomId, children }: any) {
-  const messages = useMessages(roomId);
-
+  const { roomData, messages } = useMessages(roomId);
+  const currentUid = auth.currentUser?.uid;
   return (
     <section className="relative bg-slate-800 w-full p-4 pt-0 overflow-y-auto h-[calc(100vh-64px)]">
       <div className="container pb-20 space-y-4">
-        {messages.map((msg) => (
-          <div
-            key={msg.id}
-            className={`chat ${
-              msg.uid === auth.currentUser?.uid ? "chat-end" : "chat-start"
-            }`}
-          >
-            <div className="chat-image avatar">
-              <div className="w-10 rounded-full">
-                <img
-                  src={
-                    msg.uid === auth.currentUser?.uid
-                      ? auth.currentUser?.photoURL
-                      : msg.photoURL
-                  }
-                  alt={msg.name}
-                />
+        {messages.map((msg) => {
+          const userUid = msg.uid === currentUid ? currentUid : msg.uid;
+          const dataUser = roomData?.[userUid];
+          return (
+            <div
+              key={msg.id}
+              className={`chat ${
+                msg.uid === auth.currentUser?.uid ? "chat-end" : "chat-start"
+              }`}
+            >
+              <div className="chat-image avatar">
+                <div className="w-10 rounded-full">
+                  <img src={dataUser?.photoURL} alt={msg.name} />
+                </div>
               </div>
+              <div className="chat-header">
+                {dataUser?.name}
+                <time className="text-xs opacity-50 ml-2">
+                  {msg.createdAt?.toDate
+                    ? msg.createdAt.toDate().toLocaleTimeString()
+                    : ""}
+                </time>
+              </div>
+              <div className="chat-bubble">{msg.text}</div>
+              <div className="chat-footer opacity-50">Sent</div>
             </div>
-            <div className="chat-header">
-              {msg.name}
-              <time className="text-xs opacity-50 ml-2">
-                {msg.createdAt?.toDate
-                  ? msg.createdAt.toDate().toLocaleTimeString()
-                  : ""}
-              </time>
-            </div>
-            <div className="chat-bubble">{msg.text}</div>
-            <div className="chat-footer opacity-50">Sent</div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       <div className="sticky flex bottom-0 left-0 right-0 w-full p-4 gap-2 justify-center items-center">
