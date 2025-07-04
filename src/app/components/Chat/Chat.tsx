@@ -2,6 +2,7 @@ import { auth, db } from "@/lib/firebase";
 import {
   collection,
   doc,
+  getDoc,
   onSnapshot,
   orderBy,
   query,
@@ -12,14 +13,16 @@ function useMessages(roomId: any) {
   const [roomData, setRoomData] = useState(null);
   const [messages, setMessages] = useState<any[]>([]);
 
-  const roomRef = doc(db, "rooms", roomId);
-  onSnapshot(roomRef, (docSnapshot) => {
-    if (docSnapshot.exists()) {
-      setRoomData(docSnapshot.data().userInfo);
+  const fetchRoomData = async () => {
+    const docs = await getDoc(doc(db, "rooms", roomId));
+    if (docs.exists()) {
+      setRoomData(docs.data().userInfo);
     }
-  });
+  };
 
   useEffect(() => {
+    fetchRoomData();
+
     const q = query(
       collection(db, `rooms/${roomId}/messages`),
       orderBy("createdAt", "asc")
