@@ -26,8 +26,8 @@ export default function Login() {
   };
 
   return (
-    <button className="btn btn-primary" onClick={login}>
-      Login dengan Google
+    <button className="btn btn-success text-white" onClick={login}>
+      Login
     </button>
   );
 }

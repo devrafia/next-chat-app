@@ -26,7 +26,7 @@ export default function Navbar({ children }: any) {
                 </button>
                 <button className="btn btn-ghost text-xl">Chat App</button>
               </div>
-              {children}
+              <div className="flex gap-2">{children}</div>
             </div>
           </div>
         </nav>

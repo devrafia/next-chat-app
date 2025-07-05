@@ -1,15 +1,5 @@
 import { auth, db } from "@/lib/firebase";
-import {
-  collection,
-  doc,
-  getDocs,
-  onSnapshot,
-  query,
-  setDoc,
-  where,
-} from "firebase/firestore";
-import { userInfo } from "os";
-import { useEffect, useRef, useState } from "react";
+import { useRef } from "react";
 
 async function createOrGetRoom(selectedUser: any) {
   const currentUser = auth.currentUser;
@@ -22,52 +12,7 @@ async function createOrGetRoom(selectedUser: any) {
   return roomId;
 }
 
-export function Contact({ children, onSelectRoom }: any) {
-  const [currentId, setCurrentId] = useState<string | null>(null);
-  const [users, setUsers] = useState<any[]>([]);
-
-  useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged(async (user) => {
-      if (!user) {
-        setUsers([]);
-        return;
-      }
-
-      const q = query(
-        collection(db, "rooms"),
-        where("participants", "array-contains", user.uid),
-        where("hasMessages", "==", true)
-      );
-
-      const unsubscribeRooms = onSnapshot(q, (snapshot) => {
-        const contactList = snapshot.docs
-          .map((doc) => {
-            const userInfo = doc.data().userInfo;
-            const contactId = Object.keys(userInfo).find(
-              (uid) => uid !== user.uid
-            );
-            if (!contactId) return null;
-
-            return {
-              uid: contactId,
-              user: userInfo[contactId],
-            };
-          })
-          .filter(Boolean);
-
-        setUsers(
-          contactList.map((c) => ({
-            uid: c!.uid,
-            ...c!.user,
-          }))
-        );
-      });
-      return () => unsubscribeRooms();
-    });
-
-    return () => unsubscribe();
-  }, []);
-
+export function Contact({ children, onSelectRoom, contacts }: any) {
   const handleClick = async (user: any) => {
     const roomId = await createOrGetRoom(user);
     onSelectRoom(roomId);
@@ -86,23 +31,23 @@ export function Contact({ children, onSelectRoom }: any) {
     <>
       <section className="relative flex-[0_0_33%] bg-slate-700">
         <ul className="list bg-base-100 rounded-box shadow-md">
-          {users.map((user) => (
+          {contacts.map((contact) => (
             <li
-              key={user.uid}
+              key={contact.uid}
               className="list-row hover:bg-base-200 active:bg-base-300 cursor-pointer"
-              onClick={() => handleClick(user)}
+              onClick={() => handleClick(contact)}
             >
               <div>
                 <img
                   className="size-10 rounded-box"
-                  src={user.photoURL}
-                  alt={user.name}
+                  src={contact.photoURL}
+                  alt={contact.name}
                 />
               </div>
               <div>
-                <div>{user.name}</div>
+                <div>{contact.name}</div>
                 <div className="text-xs uppercase font-semibold opacity-60">
-                  {user.status || "No status"}
+                  {contact.status || "No status"}
                 </div>
               </div>
             </li>
