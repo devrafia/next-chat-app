@@ -24,6 +24,7 @@ export default function App() {
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
       if (!user) {
         setContacts([]);
+        setRoomId(null);
         return;
       }
 
