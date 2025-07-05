@@ -1,5 +1,6 @@
-import { auth, db } from "@/lib/firebase";
-import { useRef } from "react";
+import { auth, database, db } from "@/lib/firebase";
+import { onValue, ref } from "firebase/database";
+import { useEffect, useRef, useState } from "react";
 
 async function createOrGetRoom(selectedUser: any) {
   const currentUser = auth.currentUser;
@@ -12,12 +13,22 @@ async function createOrGetRoom(selectedUser: any) {
   return roomId;
 }
 
-export function Contact({ children, onSelectRoom, contacts }: any) {
-  const handleClick = async (user: any) => {
-    const roomId = await createOrGetRoom(user);
-    onSelectRoom(roomId);
-  };
+function getUserStatus(uid) {
+  type Status = "online" | "offline";
+  const [status, setStatus] = useState<Status>("offline");
 
+  useEffect(() => {
+    const statusRef = ref(database, "status/" + uid);
+    return onValue(statusRef, (snapshot) => {
+      const data = snapshot.val();
+      setStatus(data?.state || "offline");
+    });
+  }, [uid]);
+
+  return status;
+}
+
+export function Contact({ children, onSelectRoom, contacts }: any) {
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleOpen = () => {
@@ -31,26 +42,12 @@ export function Contact({ children, onSelectRoom, contacts }: any) {
     <>
       <section className="relative flex-[0_0_33%] bg-slate-700">
         <ul className="list bg-base-100 rounded-box shadow-md">
-          {contacts.map((contact) => (
-            <li
+          {contacts.map((contact: any) => (
+            <ContactItem
               key={contact.uid}
-              className="list-row hover:bg-base-200 active:bg-base-300 cursor-pointer"
-              onClick={() => handleClick(contact)}
-            >
-              <div>
-                <img
-                  className="size-10 rounded-box"
-                  src={contact.photoURL}
-                  alt={contact.name}
-                />
-              </div>
-              <div>
-                <div>{contact.name}</div>
-                <div className="text-xs uppercase font-semibold opacity-60">
-                  {contact.status || "No status"}
-                </div>
-              </div>
-            </li>
+              contact={contact}
+              onSelectRoom={onSelectRoom}
+            />
           ))}
         </ul>
 
@@ -75,6 +72,43 @@ export function Contact({ children, onSelectRoom, contacts }: any) {
         </div>
         {children(inputRef)}
       </section>
+    </>
+  );
+}
+
+function ContactItem({ contact, onSelectRoom }) {
+  const handleClick = async (user: any) => {
+    const roomId = await createOrGetRoom(user);
+    onSelectRoom(roomId);
+  };
+
+  const status = getUserStatus(contact.uid);
+
+  return (
+    <>
+      <li
+        key={contact.uid}
+        className="list-row hover:bg-base-200 active:bg-base-300 cursor-pointer"
+        onClick={() => handleClick(contact)}
+      >
+        <div>
+          <img
+            className="size-10 rounded-box"
+            src={contact.photoURL}
+            alt={contact.name}
+          />
+        </div>
+        <div>
+          <div>{contact.name}</div>
+          <div
+            className={`text-xs uppercase font-semibold opacity-60 ${
+              status == "online" ? "text-green-400" : ""
+            }`}
+          >
+            {status || "No status"}
+          </div>
+        </div>
+      </li>
     </>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
-import { auth, db } from "@/lib/firebase";
-import { useEffect, useState } from "react";
+import { auth, database, db } from "@/lib/firebase";
+import { use, useEffect, useState } from "react";
 import {
   collection,
   onSnapshot,
@@ -15,10 +15,44 @@ import { Contact } from "../components/Contact/Contact";
 import Chat from "../components/Chat/Chat";
 import ChatInput from "../components/Chat/ChatInput";
 import AddForm from "../components/Contact/AddForm";
+import { onDisconnect, onValue, ref, set } from "firebase/database";
 
 export default function App() {
   const [roomId, setRoomId] = useState(null);
   const [contacts, setContacts] = useState<any[]>([]);
+
+  function usePresence() {
+    if (!auth.currentUser) return;
+
+    const uid = auth.currentUser.uid;
+    const userStatusDatabaseRef = ref(database, "status/" + uid);
+
+    const isOfflineForDatabase = {
+      state: "offline",
+      last_changed: Date.now(),
+    };
+
+    const isOnlineForDatabase = {
+      state: "online",
+      last_changed: Date.now(),
+    };
+
+    const connectedRef = ref(database, ".info/connected");
+    const unsubscribe = onValue(connectedRef, (snap) => {
+      if (snap.val() === false) {
+        set(userStatusDatabaseRef, isOfflineForDatabase);
+        return;
+      }
+
+      onDisconnect(userStatusDatabaseRef)
+        .set(isOfflineForDatabase)
+        .then(() => {
+          set(userStatusDatabaseRef, isOnlineForDatabase);
+        });
+    });
+
+    return () => unsubscribe();
+  }
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
@@ -27,6 +61,8 @@ export default function App() {
         setRoomId(null);
         return;
       }
+
+      usePresence();
 
       const q = query(
         collection(db, "rooms"),
