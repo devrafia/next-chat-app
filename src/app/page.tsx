@@ -20,6 +20,7 @@ import { Logout } from "./components/Navbar/Logout";
 import { Contact } from "./components/Contact/Contact";
 import Chat from "./components/Chat/Chat";
 import ChatInput from "./components/Chat/ChatInput";
+import AddForm from "./components/Contact/AddForm";
 
 export default function App() {
   const [roomId, setRoomId] = useState("s");
@@ -31,7 +32,11 @@ export default function App() {
       </Navbar>
       <main>
         <div className="flex flex-1 h-[calc(100vh-64px)]">
-          <Contact onSelectRoom={setRoomId} />
+          <Contact onSelectRoom={setRoomId}>
+            {(inputRef: any) => (
+              <AddForm inputRef={inputRef} setRoomId={setRoomId} />
+            )}
+          </Contact>
           <Chat roomId={roomId}>
             <ChatInput roomId={roomId} />
           </Chat>

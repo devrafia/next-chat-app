@@ -1,5 +1,12 @@
 import { auth, db } from "@/lib/firebase";
-import { addDoc, collection, serverTimestamp } from "firebase/firestore";
+import {
+  addDoc,
+  collection,
+  doc,
+  serverTimestamp,
+  setDoc,
+} from "firebase/firestore";
+import InputPrimary from "../Input/InputPrimary";
 
 export default function ChatInput({ roomId }: any) {
   const sendMessage = async () => {
@@ -13,14 +20,19 @@ export default function ChatInput({ roomId }: any) {
       createdAt: serverTimestamp(),
     });
 
+    await setDoc(
+      doc(db, "rooms", roomId),
+      { hasMessages: true },
+      { merge: true }
+    );
+
     input.value = "";
   };
   return (
     <>
-      <input
+      <InputPrimary
         type="text"
         placeholder="Send a Message!"
-        className="input input-primary w-full"
         id="message-input"
       />
       <div
