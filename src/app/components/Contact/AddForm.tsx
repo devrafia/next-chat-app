@@ -40,9 +40,12 @@ export default function AddForm({ inputRef, setRoomId }: any) {
     const uidB = targetUser.id;
 
     const roomId = [uidA, uidB].sort().join("_");
-    await setDoc(
-      doc(db, "rooms", roomId),
-      {
+
+    const roomRef = doc(db, "rooms", roomId);
+    const roomSnap = await getDoc(roomRef);
+
+    if (!roomSnap.exists()) {
+      await setDoc(roomRef, {
         participants: [uidA, uidB],
         userInfo: {
           [uidA]: {
@@ -57,13 +60,14 @@ export default function AddForm({ inputRef, setRoomId }: any) {
           },
         },
         hasMessages: false,
-      },
-      { merge: true }
-    );
+      });
+    }
     setRoomId(roomId);
 
     input.value = "";
     alert("Kontak berhasil ditambahkan");
+    const modal = document.getElementById("my_modal_2") as HTMLInputElement;
+    modal.removeAttribute("open");
   }
   return (
     <>
