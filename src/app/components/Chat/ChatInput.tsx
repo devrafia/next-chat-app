@@ -22,7 +22,10 @@ export default function ChatInput({ roomId }: any) {
 
     await setDoc(
       doc(db, "rooms", roomId),
-      { hasMessages: true },
+      {
+        hasMessages: true,
+        lastActivity: serverTimestamp(),
+      },
       { merge: true }
     );
 
