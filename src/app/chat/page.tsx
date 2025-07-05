@@ -64,7 +64,20 @@ export default function App() {
   }, []);
   return (
     <>
-      <Navbar>{auth.currentUser ? <Logout /> : <Login />}</Navbar>
+      <Navbar>
+        {auth.currentUser ? (
+          <>
+            <img
+              src={auth.currentUser.photoURL}
+              className="rounded-full w-10 h-10"
+              alt=""
+            />
+            <Logout />
+          </>
+        ) : (
+          <Login />
+        )}
+      </Navbar>
       <main>
         <div className="bg-slate-400 h-[calc(100vh-64px)]">
           <div className="flex flex-1 h-full">
