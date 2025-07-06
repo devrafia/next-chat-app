@@ -13,7 +13,7 @@ import {
 } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
 
-export default function AddForm({ inputRef, setRoomId }: any) {
+export default function AddForm({ inputRef, setRoomId, chatInputRef }: any) {
   async function handleSubmit(e: any) {
     e.preventDefault();
 
@@ -66,6 +66,11 @@ export default function AddForm({ inputRef, setRoomId }: any) {
 
     input.value = "";
     alert("Kontak berhasil ditambahkan");
+
+    setTimeout(() => {
+      chatInputRef.current.focus();
+    }, 100);
+
     const modal = document.getElementById("my_modal_2") as HTMLDialogElement;
     modal.close();
   }

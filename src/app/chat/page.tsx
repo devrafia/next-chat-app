@@ -1,6 +1,6 @@
 "use client";
 import { auth, database, db } from "@/lib/firebase";
-import { use, useEffect, useState } from "react";
+import { use, useEffect, useRef, useState } from "react";
 import {
   collection,
   onSnapshot,
@@ -20,6 +20,7 @@ import { onDisconnect, onValue, ref, set } from "firebase/database";
 export default function App() {
   const [roomId, setRoomId] = useState(null);
   const [contacts, setContacts] = useState<any[]>([]);
+  const chatInputRef = useRef(null);
 
   function usePresence() {
     if (!auth.currentUser) return;
@@ -120,12 +121,16 @@ export default function App() {
           <div className="flex flex-1 h-full">
             <Contact onSelectRoom={setRoomId} contacts={contacts}>
               {(inputRef: any) => (
-                <AddForm inputRef={inputRef} setRoomId={setRoomId} />
+                <AddForm
+                  inputRef={inputRef}
+                  setRoomId={setRoomId}
+                  chatInputRef={chatInputRef}
+                />
               )}
             </Contact>
             {roomId ? (
               <Chat roomId={roomId}>
-                <ChatInput roomId={roomId} />
+                <ChatInput roomId={roomId} chatInputRef={chatInputRef} />
               </Chat>
             ) : (
               <div className="flex flex-col items-center justify-center h-full bg-slate-900 w-full text-center p-6">

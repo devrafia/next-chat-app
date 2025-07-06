@@ -8,7 +8,7 @@ import {
 } from "firebase/firestore";
 import InputPrimary from "../Input/InputPrimary";
 
-export default function ChatInput({ roomId }: any) {
+export default function ChatInput({ roomId, chatInputRef }: any) {
   const sendMessage = async (e: any) => {
     e.preventDefault();
     const input = document.getElementById("message-input") as HTMLInputElement;
@@ -36,6 +36,7 @@ export default function ChatInput({ roomId }: any) {
     <>
       <form onSubmit={(e) => sendMessage(e)} className="w-full flex gap-2">
         <InputPrimary
+          ref={chatInputRef}
           type="text"
           placeholder="Send a Message!"
           id="message-input"
