@@ -66,8 +66,8 @@ export default function AddForm({ inputRef, setRoomId }: any) {
 
     input.value = "";
     alert("Kontak berhasil ditambahkan");
-    const modal = document.getElementById("my_modal_2") as HTMLInputElement;
-    modal.removeAttribute("open");
+    const modal = document.getElementById("my_modal_2") as HTMLDialogElement;
+    modal.close();
   }
   return (
     <>
