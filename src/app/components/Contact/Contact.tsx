@@ -1,5 +1,6 @@
 import { auth, database, db } from "@/lib/firebase";
 import { onValue, ref } from "firebase/database";
+import { collection, query, where } from "firebase/firestore";
 import { useEffect, useRef, useState } from "react";
 
 async function createOrGetRoom(selectedUser: any) {

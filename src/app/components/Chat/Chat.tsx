@@ -1,11 +1,13 @@
 import { auth, db } from "@/lib/firebase";
 import {
+  arrayUnion,
   collection,
   doc,
   getDoc,
   onSnapshot,
   orderBy,
   query,
+  updateDoc,
 } from "firebase/firestore";
 import { useEffect, useRef, useState } from "react";
 
@@ -34,6 +36,18 @@ function useMessages(roomId: any) {
         ...doc.data(),
       }));
       setMessages(docs);
+
+      const currentUid = auth.currentUser?.uid;
+      if (currentUid) {
+        docs.forEach((msg) => {
+          if (!msg.readBy?.includes(currentUid)) {
+            const msgRef = doc(db, `rooms/${roomId}/messages/${msg.id}`);
+            updateDoc(msgRef, {
+              readBy: arrayUnion(currentUid),
+            });
+          }
+        });
+      }
     });
     return () => unsubscribe();
   }, [roomId]);
@@ -46,6 +60,10 @@ export default function Chat({ roomId, children }: any) {
   const currentUid = auth.currentUser?.uid;
   const bottomRef = useRef<HTMLDivElement>(null);
 
+  const targetUserUid = Object.keys(roomData || {}).find(
+    (uid) => uid !== currentUid
+  );
+
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
@@ -55,8 +73,16 @@ export default function Chat({ roomId, children }: any) {
       <div className="container h-full p-4 overflow-y-auto">
         <div className="space-y-4">
           {messages.map((msg) => {
+            const isOwnMessage = msg.uid === currentUid;
             const userUid = msg.uid === currentUid ? currentUid : msg.uid;
             const dataUser = roomData?.[userUid];
+
+            const status =
+              isOwnMessage && targetUserUid
+                ? msg.readBy?.includes(targetUserUid)
+                  ? "Seen"
+                  : "Sent"
+                : "";
             return (
               <div
                 key={msg.id}
@@ -77,8 +103,46 @@ export default function Chat({ roomId, children }: any) {
                       : ""}
                   </time>
                 </div>
-                <div className="chat-bubble">{msg.text}</div>
-                <div className="chat-footer opacity-50">Sent</div>
+                <div
+                  className={`chat-bubble ${
+                    msg.uid === auth.currentUser?.uid ? "bg-primary" : ""
+                  }`}
+                >
+                  <div className="flex items-center justify-center">
+                    {msg.text}
+                    {msg.uid == auth.currentUser.uid ? (
+                      <div className="">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="20"
+                          height="20"
+                          fill="none"
+                          viewBox="0 0 30 24"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          className="text-white inline"
+                        >
+                          {status == "Seen" ? (
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M5 13l4 4L19 7"
+                            />
+                          ) : (
+                            ""
+                          )}
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M10 13l4 4L24 7"
+                          />
+                        </svg>
+                      </div>
+                    ) : (
+                      ""
+                    )}
+                  </div>
+                </div>
               </div>
             );
           })}
