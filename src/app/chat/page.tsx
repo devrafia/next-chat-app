@@ -3,6 +3,7 @@ import { auth, database, db } from "@/lib/firebase";
 import { use, useEffect, useRef, useState } from "react";
 import {
   collection,
+  getDocs,
   onSnapshot,
   orderBy,
   query,
@@ -73,27 +74,48 @@ export default function App() {
       );
 
       const unsubscribeRooms = onSnapshot(q, (snapshot) => {
-        const contactList = snapshot.docs
-          .map((doc) => {
-            const userInfo = doc.data().userInfo;
-            const contactId = Object.keys(userInfo).find(
-              (uid) => uid !== user.uid
-            );
-            if (!contactId) return null;
+        const processSnapshot = async () => {
+          const contactList = await Promise.all(
+            snapshot.docs.map(async (doc) => {
+              const data = doc.data();
+              const userInfo = data.userInfo;
+              const contactId = Object.keys(userInfo).find(
+                (uid) => uid !== user.uid
+              );
+              if (!contactId) return null;
 
-            return {
-              uid: contactId,
-              user: userInfo[contactId],
-            };
-          })
-          .filter(Boolean);
+              const messagesRef = collection(db, "rooms", doc.id, "messages");
+              const messageSnap = await getDocs(messagesRef);
 
-        setContacts(
-          contactList.map((c) => ({
-            uid: c!.uid,
-            ...c!.user,
-          }))
-        );
+              let unreadCount = 0;
+              messageSnap.forEach((msgDoc) => {
+                const msg = msgDoc.data();
+                if (
+                  msg.uid != user.uid &&
+                  (!msg.readBy || !msg.readBy.includes(user.uid))
+                ) {
+                  unreadCount++;
+                }
+              });
+
+              return {
+                uid: contactId,
+                user: userInfo[contactId],
+                unreadMessages: unreadCount,
+              };
+            })
+          );
+
+          setContacts(
+            contactList.filter(Boolean).map((c) => ({
+              uid: c!.uid,
+              ...c!.user,
+              unreadMessages: c!.unreadMessages,
+            }))
+          );
+        };
+
+        processSnapshot();
       });
       return () => unsubscribeRooms();
     });
@@ -119,7 +141,7 @@ export default function App() {
       <main>
         <div className="bg-slate-400 h-[calc(100vh-64px)]">
           <div className="flex flex-1 h-full">
-            <Contact onSelectRoom={setRoomId} contacts={contacts}>
+            <Contact setRoomId={setRoomId} contacts={contacts}>
               {(inputRef: any) => (
                 <AddForm
                   inputRef={inputRef}

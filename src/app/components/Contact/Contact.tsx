@@ -3,8 +3,9 @@ import { onValue, ref } from "firebase/database";
 import { collection, query, where } from "firebase/firestore";
 import { useEffect, useRef, useState } from "react";
 
-async function createOrGetRoom(selectedUser: any) {
+async function createOrGetRoom(selectedUser: any, setSelectedContact: any) {
   const currentUser = auth.currentUser;
+
   if (!currentUser) throw new Error("User not logged in");
 
   const uidA = currentUser.uid;
@@ -29,7 +30,8 @@ function getUserStatus(uid) {
   return status;
 }
 
-export function Contact({ children, onSelectRoom, contacts }: any) {
+export function Contact({ children, setRoomId, contacts }: any) {
+  const [selectedContact, setSelectedContact] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleOpen = () => {
@@ -47,7 +49,9 @@ export function Contact({ children, onSelectRoom, contacts }: any) {
             <ContactItem
               key={contact.uid}
               contact={contact}
-              onSelectRoom={onSelectRoom}
+              setRoomId={setRoomId}
+              selectedContact={selectedContact}
+              setSelectedContact={setSelectedContact}
             />
           ))}
         </ul>
@@ -77,10 +81,18 @@ export function Contact({ children, onSelectRoom, contacts }: any) {
   );
 }
 
-function ContactItem({ contact, onSelectRoom }) {
+function ContactItem({
+  contact,
+  setRoomId,
+  selectedContact,
+  setSelectedContact,
+}) {
   const handleClick = async (user: any) => {
-    const roomId = await createOrGetRoom(user);
-    onSelectRoom(roomId);
+    const selectedUser = user;
+    setSelectedContact(selectedUser.uid);
+    const roomId = await createOrGetRoom(selectedUser, setSelectedContact);
+    contact.unreadMessages = 0;
+    setRoomId(roomId);
   };
 
   const status = getUserStatus(contact.uid);
@@ -89,12 +101,14 @@ function ContactItem({ contact, onSelectRoom }) {
     <>
       <li
         key={contact.uid}
-        className="list-row hover:bg-base-200 active:bg-base-300 cursor-pointer"
+        className={`list-row cursor-pointer rounded-none transition-all duration-150 ${
+          selectedContact == contact.uid ? "bg-secondary" : "hover:bg-base-200"
+        }`}
         onClick={() => handleClick(contact)}
       >
         <div>
           <img
-            className="size-10 rounded-box"
+            className="size-10 rounded-box border-2 border-white"
             src={contact.photoURL}
             alt={contact.name}
           />
@@ -102,12 +116,15 @@ function ContactItem({ contact, onSelectRoom }) {
         <div>
           <div>{contact.name}</div>
           <div
-            className={`text-xs uppercase font-semibold opacity-60 ${
-              status == "online" ? "text-green-400" : ""
+            className={`text-xs uppercase font-bold transition-all duration-1000 w-max rounded-lg ${
+              status == "online" ? "text-white bg-green-500 p-1" : ""
             }`}
           >
             {status || "No status"}
           </div>
+        </div>
+        <div className="flex items-center justify-center bg-primary rounded-sm aspect-square">
+          <span>{contact.unreadMessages}</span>
         </div>
       </li>
     </>
