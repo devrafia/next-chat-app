@@ -39,7 +39,7 @@ function useMessages(roomId: any) {
 
       const currentUid = auth.currentUser?.uid;
       if (currentUid) {
-        docs.forEach((msg) => {
+        docs.forEach((msg: any) => {
           if (!msg.readBy?.includes(currentUid)) {
             const msgRef = doc(db, `rooms/${roomId}/messages/${msg.id}`);
             updateDoc(msgRef, {
