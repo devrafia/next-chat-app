@@ -19,15 +19,14 @@ export default function AddForm({ inputRef, setRoomId, chatInputRef }: any) {
 
     const input = document.getElementById("add-form-input") as HTMLInputElement;
     const emailInput = input?.value?.trim().toLowerCase();
-    if (!emailInput || !auth.currentUser)
-      return alert("Email harus diisi dan kamu harus login");
+    if (!emailInput || !auth.currentUser) return alert("Email must be filled");
 
     const usersRef = collection(db, "users");
     const q = query(usersRef, where("email", "==", emailInput));
     const querySnapshot = await getDocs(q);
 
     if (querySnapshot.empty) {
-      alert("User dengan email tersebut tidak ditemukan");
+      alert("User not found");
       return;
     }
 
@@ -65,7 +64,7 @@ export default function AddForm({ inputRef, setRoomId, chatInputRef }: any) {
     setRoomId(roomId);
 
     input.value = "";
-    alert("Kontak berhasil ditambahkan");
+    alert("Contact added succesfully");
 
     setTimeout(() => {
       chatInputRef.current.focus();
